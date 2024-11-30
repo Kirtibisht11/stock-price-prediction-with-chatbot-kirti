@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockPal Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="#home" class="active">Home</a>
+        <a href="https://en.wikipedia.org/wiki/Stock_market_prediction">More</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact Developer</a>
+    </div>
+
+    <!--chatbot UI-->
+    <div class="chat-widget">
+        <div class="chat-header">
+            <div id="bot-icon">🤖</div>
+            <div id="bot-name">StockPal</div>
+        </div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-input">
+            <input id="user-input" type="text" placeholder="Type your message..." />
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    
+    <!-- Stock Price Prediction Section -->
+    <div class="container">
+        <div class="prediction-header">
+            <div id="header">Stock Price Prediction</div>
+        </div>
+        <form method="POST" id="prediction-form" action="/predict">
+                <div class="form-group">
+                <label for="ticker">Select Stock Ticker</label>
+                <select name="ticker" id="ticker" class="form-control" required>
+                    <option value="AAPL">AAPL - Apple</option>
+                    <option value="GOOG">GOOG - Google</option>
+                    <option value="AMZN">AMZN - Amazon</option>
+                    <option value="MSFT">MSFT - Microsoft</option>
+                    <option value="TSLA">TSLA - Tesla</option>
+                    <option value="NFLX">NFLX - Netflix</option>
+                    <option value="FB">FB - Facebook</option>
+                    <option value="NVDA">NVDA</option>
+                    <option value="INTC">INTC</option>
+                    <option value="IBM">IBM</option>
+                </select>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" required>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" required>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="prediction_days">Prediction Duration (Days)</label>
+                <input type="number" id="prediction_days" name="prediction_days" class="form-control" required min="1" max="365">
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary btn-block">Predict</button>
+        </form>
+
+        {% if predictions %}
+        <h3>Predicted Stock Prices</h3>
+        <ul>
+            {% for price in predictions %}
+                <li>{{ price }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Available Stock Data</h3>
+        <p>Data is available from {{ first_date }} to {{ last_date }}.</p>
+        <p>Total number of dates: {{ num_dates }}</p>
+
+        <h3>Prediction Plot</h3>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Prediction Plot">
+        {% endif %}
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Developed by <strong>Kirti Bisht</strong> | <a href="https://www.linkedin.com/in/kirti-bisht-k0805b">Contact</a></p>
+    </div>
+</body>
+</html>
