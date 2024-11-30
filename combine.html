@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="#home" class="active">Home</a>
+        <a href="https://en.wikipedia.org/wiki/Stock_market_prediction">More</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact Developer</a>
+    </div>
+
     <!--chatbot UI-->
     <div class="chat-widget">
         <div class="chat-header">
@@ -20,13 +28,15 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src="script.js"></script>
+    
     
     <!-- Stock Price Prediction Section -->
     <div class="container">
-        <h1>Stock Price Prediction</h1>
+        <div class="prediction-header">
+            <div id="header">Stock Price Prediction</div>
+        </div>
         <form method="POST" id="prediction-form" action="/predict">
-            <div class="form-group">
+                <div class="form-group">
                 <label for="ticker">Select Stock Ticker</label>
                 <select name="ticker" id="ticker" class="form-control" required>
                     <option value="AAPL">AAPL - Apple</option>
@@ -41,18 +51,22 @@
                     <option value="IBM">IBM</option>
                 </select>
             </div>
+            <br>
             <div class="form-group">
                 <label for="start_date">Start Date</label>
                 <input type="date" id="start_date" name="start_date" class="form-control" required>
             </div>
+            <br>
             <div class="form-group">
                 <label for="end_date">End Date</label>
                 <input type="date" id="end_date" name="end_date" class="form-control" required>
             </div>
+            <br>
             <div class="form-group">
                 <label for="prediction_days">Prediction Duration (Days)</label>
                 <input type="number" id="prediction_days" name="prediction_days" class="form-control" required min="1" max="365">
             </div>
+            <br>
             <button type="submit" class="btn btn-primary btn-block">Predict</button>
         </form>
 
