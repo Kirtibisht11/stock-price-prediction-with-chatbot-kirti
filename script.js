@@ -1,4 +1,11 @@
 const chatBody = document.getElementById("chat-body");
+const navbarLinks = document.querySelectorAll('.navbar a');
+    navbarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            navbarLinks.forEach(l => l.classList.remove('active')); // Remove active from all
+            link.classList.add('active'); // Add active to clicked link
+        });
+    });
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
@@ -17,7 +24,52 @@ const stockDefinitions = {
     "types of stocks": "There are several types of stocks, including common stocks, preferred stocks, growth stocks, and dividend stocks.",
     "finance market": "The finance market encompasses various sectors such as stocks, bonds, commodities, and currencies where financial instruments are traded.",
     "financial news": "Financial news includes reports and updates on market conditions, stock prices, mergers, acquisitions, and economic events affecting financial markets.",
+    "Share": "A single unit of ownership in a company.",
+    "Common Stock": "Shares that give shareholders voting rights and potential dividends.",
+    "Preferred Stock": "Shares that generally do not have voting rights but offer fixed dividends.",
+    "Blue Chip Stocks": "Shares of large, reputable companies with a history of stable performance.",
+    "Growth Stocks": "Stocks of companies expected to grow at an above-average rate compared to their industry.",
+    "Value Stocks": "Stocks trading at a lower price relative to their fundamentals, considered undervalued.",
+    "Bid Price": "The highest price a buyer is willing to pay for a stock.",
+    "Ask Price": "The lowest price a seller is willing to accept for a stock.",
+    "Spread": "The difference between the bid and ask price.",
+    "Volume": "The number of shares traded during a given time period.",
+    "Market Order": "An order to buy or sell a stock immediately at the best available price.",
+    "Limit Order": "An order to buy or sell a stock at a specific price or better.",
+    "Stop-Loss Order": "An order to sell a stock when it reaches a certain price to limit an investor's loss.",
+    "Day Trading": "The practice of buying and selling stocks within the same trading day.",
+    "Earnings Per Share/EPS": "A company's profit divided by the number of outstanding shares.",
+    "Price-to-Earnings Ratio (P/E)": "A valuation ratio of a company's current share price relative to its EPS.",
+    "Dividend": "A portion of a company's earnings distributed to shareholders.",
+    "Yield": "The dividend expressed as a percentage of the stock price.",
+    "Book Value": "The net value of a company's assets minus its liabilities.",
+    "Index": "A benchmark that tracks the performance of a group of stocks, e.g., S&P 500.",
+    "Volatility": "A measure of price fluctuations in the market.",
+    "Resistance Level": "A price level where a stock tends to face selling pressure.",
+    "Support Level": "A price level where a stock tends to find buying interest.",
+    "Diversification": "Spreading investments across various financial instruments to reduce risk.",
+    "Portfolio": "A collection of investments owned by an individual or institution.",
+    "Hedging": "Using financial instruments to offset potential losses in investments.",
+    "Leverage": "Borrowing money to increase the potential return on an investment.",
+    "Short Selling": "Selling borrowed shares with the aim of buying them back later at a lower price.",
+    "Candlestick Chart": "A type of chart used to analyze price movements of securities.",
+    "Moving Average": "An indicator showing the average price of a stock over a specific time period.",
+    "RSI (Relative Strength Index)": "A momentum oscillator measuring the speed and change of price movements.",
+    "MACD (Moving Average Convergence Divergence)": "A trend-following momentum indicator.",
+    "Fibonacci Retracement": "A tool to identify potential support and resistance levels.",
+    "Liquidity": "The ease with which an asset can be converted into cash.",
+    "Penny Stocks": "Stocks of small companies that trade at low prices.",
+    "ETF (Exchange-Traded Fund)": "A basket of securities traded on an exchange like a stock.",
+    "Mutual Fund": "An investment vehicle pooling money from many investors to purchase securities.",
+    "Options": "Contracts granting the right, but not the obligation, to buy or sell an asset at a set price before expiration.",
+    "Futures": "Contracts to buy or sell an asset at a predetermined price on a specific future date.",
+    "Margin": "Borrowed money used to purchase investments."  
 };
+// Normalize stockDefinitions keys to lowercase for consistent case-insensitive matching
+const normalizedStockDefinitions = {};
+for (const key in stockDefinitions) {
+    normalizedStockDefinitions[key.toLowerCase()] = stockDefinitions[key];
+}
 
 // Weather API keys (replace with valid keys)
 const weatherApis = ["4ce6870a6c2dc05d9d1151912dd0db09", "38fe0b478a78dcb97f4a4e7839b663be", "7e191d9315101c3f4b3ee0f6835639d5", "cb92c5e8c223bfe4fe9241b8449b1cb7"];
@@ -56,78 +108,11 @@ const fetchWeather = async (location) => {
     appendMessage("Sorry, I couldn't fetch the weather information at the moment. Please try again later.", "bot");
 };
 
-// Function to extract city from the user's input
+
+// Extract city name from user input
 const extractCity = (input) => {
-    // Remove common keywords like 'time', 'in', 'the', etc., to extract the city
-    const cityKeywords = ["time", "in", "the", "what's", "what", "is", "of"];
-    let words = input.split(" ").filter(word => !cityKeywords.includes(word.toLowerCase()));
-    
-    // Return the city as a single string
-    return words.join(" ");
-};
-
-// Function to fetch time for the extracted city using TimeZoneDB API
-const fetchTime = async (input) => {
-    const city = extractCity(input);
-    
-    if (!city) {
-        appendMessage("Please provide a valid city name.", "bot");
-        return;
-    }
-
-    const apiKeys = ["MB7FYAXJUMEG", "UKGBZ41USJT7"];
-    let cityFound = false;
-
-    // Get the current system time in UTC
-    const systemTime = new Date();
-    const systemTimeUTC = systemTime.getTime() + systemTime.getTimezoneOffset() * 60000; // Convert system time to UTC
-
-    for (const apiKey of apiKeys) {
-        const url = `https://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&by=zone&zone=${encodeURIComponent(city)}&format=json`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.status === "OK" && data.formatted) {
-                cityFound = true;
-
-                // Extract date and time
-                const [datePart, timePart] = data.formatted.split(" ");
-                const [cityHour, cityMinute, citySecond] = timePart.split(":").map(Number);
-
-                // Get the timezone offset in seconds (GMT Offset)
-                const offsetInSeconds = data.gmtOffset;
-                const offsetInHours = Math.floor(offsetInSeconds / 3600);
-                const offsetInMinutes = Math.floor((offsetInSeconds % 3600) / 60);
-
-                // Convert system time (UTC) to the city's local time
-                let cityTimeInMS = systemTimeUTC + (offsetInSeconds * 1000); // System time in UTC + offset in milliseconds
-                const cityDate = new Date(cityTimeInMS);
-
-                // Get the adjusted time from the city
-                const adjustedHour = cityDate.getUTCHours();
-                const adjustedMinute = cityDate.getUTCMinutes();
-                const adjustedSecond = cityDate.getUTCSeconds();
-
-                // Convert adjusted time to GMT (this should already be GMT)
-                const gmtTime = new Date(cityDate.toUTCString());
-
-                const amPm = adjustedHour >= 12 ? "PM" : "AM";
-                const hour12 = adjustedHour % 12 || 12;
-                const formattedTime = `${hour12}:${adjustedMinute.toString().padStart(2, "0")} ${amPm}`;
-
-                appendMessage(`The current GMT time in ${city} is ${formattedTime} on ${datePart}.`, "bot");
-                return;
-            }
-        } catch (error) {
-            console.error("Error fetching time:", error);
-        }
-    }
-
-    if (!cityFound) {
-        appendMessage(`Sorry, I couldn't find the time for ${city}. Please check the city name and try again.`, "bot");
-    }
+    const match = input.match(/in\s+(.*)/i);
+    return match ? match[1].trim() : null;
 };
 
 // Handle user messages and provide appropriate responses
@@ -139,27 +124,25 @@ const processMessage = async (message) => {
         appendMessage("Hello! How can I assist you today?", "bot");
     } else if (lowerMessage.includes("thank") || lowerMessage.includes("okay")) {
         appendMessage("You're welcome! Let me know if you need anything else.", "bot");
-    } else if (lowerMessage.includes("weather")) {
-        const location = lowerMessage.split("weather in")[1]?.trim() || "Dehradun";
+    } else if (lowerMessage.includes("bye") || lowerMessage.includes("bye")) {
+        appendMessage("Goodbye! It was nice talking to you!", "bot");
+    }else if (lowerMessage.includes("weather")) {
+        const location = extractCity(lowerMessage) || "Dehradun";
         await fetchWeather(location);
     } else if (lowerMessage.includes("time")) {
-        const city = lowerMessage.split("time in")[1]?.trim() || "Dehradun";
-        await fetchTime(city);
-    } else if (Object.keys(stockDefinitions).some((term) => lowerMessage.includes(term))) {
-        const term = Object.keys(stockDefinitions).find((key) => lowerMessage.includes(key));
+        appendMessage("Time-related functionality is not implemented yet.", "bot");
+    } else if (Object.keys(stockDefinitions).some((term) => lowerMessage.includes(term.toLowerCase()))) {
+        const term = Object.keys(stockDefinitions).find((key) => lowerMessage.includes(key.toLowerCase()));
         appendMessage(stockDefinitions[term], "bot");
-    } else if (
-        ["explain", "tell me about", "define"].some((trigger) => lowerMessage.includes(trigger))
-    ) {
+    } else if (["explain", "tell me about", "define"].some((trigger) => lowerMessage.includes(trigger))) {
         const term = lowerMessage
-            .replace("explain", "")
-            .replace("tell me about", "")
-            .replace("define", "")
+            .replace(/explain|tell me about|define/gi, "")
             .trim();
         if (term) {
-            await fetchDefinition(term);
+            const definition = stockDefinitions[term.toLowerCase()];
+            appendMessage(definition || `I'm sorry, I don't have a definition for "${term}".`, "bot");
         } else {
-            appendMessage("Please specify what you'd like me to explain in detail.", "bot");
+            appendMessage("Please specify what you'd like me to define or explain.", "bot");
         }
     } else {
         appendMessage("I didn't understand that. Can you rephrase?", "bot");
